@@ -46,8 +46,36 @@ public class RestApiController {
         // Enable CORS
         enableCORS();
 
+        // Root endpoint - health check
+        get("/", (req, res) -> {
+            res.type("application/json");
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "EcoSmart Waste Management Backend");
+            response.put("status", "running");
+            response.put("version", "1.0.0");
+            response.put("mockMode", dbManager.isUsingMockData());
+            return gson.toJson(response);
+        });
+
+        // Health endpoint
+        get("/health", (req, res) -> {
+            res.type("application/json");
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "healthy");
+            response.put("database", dbManager.isUsingMockData() ? "mock" : "mysql");
+            return gson.toJson(response);
+        });
+
         // API Routes
         path("/api", () -> {
+            // Health check for API
+            get("/health", (req, res) -> {
+                res.type("application/json");
+                Map<String, String> response = new HashMap<>();
+                response.put("status", "ok");
+                return gson.toJson(response);
+            });
+
             // Get all bins for a school
             get("/schools/:schoolId/bins", this::getSchoolBins);
 

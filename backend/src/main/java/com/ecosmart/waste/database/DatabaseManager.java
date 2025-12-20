@@ -10,10 +10,13 @@ import java.util.List;
 /**
  * Singleton pattern database manager for MySQL connectivity.
  * Maintains a single JDBC connection and provides data access methods.
+ * Falls back to mock data when MySQL is not available.
  */
 public class DatabaseManager {
     private static DatabaseManager instance;
     private Connection connection;
+    private boolean useMockData = false;
+    private MockDatabaseManager mockDb;
 
     // Database configuration
     private static final String DB_URL = System.getenv().getOrDefault("DB_URL", "jdbc:mysql://localhost:3306/ecosmart_waste");
@@ -30,8 +33,10 @@ public class DatabaseManager {
             this.connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             System.out.println("Database connection established successfully");
         } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("Failed to establish database connection: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("MySQL not available, switching to mock data mode: " + e.getMessage());
+            this.useMockData = true;
+            this.mockDb = MockDatabaseManager.getInstance();
+            System.out.println("[MOCK MODE] Using in-memory mock database for development");
         }
     }
 
@@ -43,6 +48,13 @@ public class DatabaseManager {
             instance = new DatabaseManager();
         }
         return instance;
+    }
+
+    /**
+     * Check if using mock data mode.
+     */
+    public boolean isUsingMockData() {
+        return useMockData;
     }
 
     /**
@@ -66,6 +78,10 @@ public class DatabaseManager {
      * Retrieves a school by ID.
      */
     public School getSchoolById(Long schoolId) throws SQLException {
+        if (useMockData) {
+            return mockDb.getSchoolById(schoolId);
+        }
+
         String query = "SELECT * FROM schools WHERE id = ?";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(query)) {
@@ -88,6 +104,10 @@ public class DatabaseManager {
      * Retrieves all schools.
      */
     public List<School> getAllSchools() throws SQLException {
+        if (useMockData) {
+            return mockDb.getAllSchools();
+        }
+
         List<School> schools = new ArrayList<>();
         String query = "SELECT * FROM schools";
 
@@ -112,6 +132,10 @@ public class DatabaseManager {
      * Retrieves all bins for a specific school.
      */
     public List<Bin> getBinsBySchoolId(Long schoolId) throws SQLException {
+        if (useMockData) {
+            return mockDb.getBinsBySchoolId(schoolId);
+        }
+
         List<Bin> bins = new ArrayList<>();
         String query = "SELECT * FROM bins WHERE school_id = ?";
 
@@ -135,6 +159,10 @@ public class DatabaseManager {
      * Retrieves a bin by ID with all its waste items loaded.
      */
     public Bin getBinById(Long binId) throws SQLException {
+        if (useMockData) {
+            return mockDb.getBinById(binId);
+        }
+
         String query = "SELECT * FROM bins WHERE id = ?";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(query)) {
@@ -165,6 +193,10 @@ public class DatabaseManager {
      * Retrieves all waste items for a specific bin.
      */
     public List<WasteItem> getWasteItemsByBinId(Long binId) throws SQLException {
+        if (useMockData) {
+            return mockDb.getWasteItemsByBinId(binId);
+        }
+
         List<WasteItem> items = new ArrayList<>();
         String query = "SELECT * FROM waste_items WHERE bin_id = ? ORDER BY timestamp DESC";
 
@@ -183,6 +215,10 @@ public class DatabaseManager {
      * Retrieves waste items for a bin within a date range.
      */
     public List<WasteItem> getWasteItemsByBinIdAndDateRange(Long binId, LocalDateTime start, LocalDateTime end) throws SQLException {
+        if (useMockData) {
+            return mockDb.getWasteItemsByBinIdAndDateRange(binId, start, end);
+        }
+
         List<WasteItem> items = new ArrayList<>();
         String query = "SELECT * FROM waste_items WHERE bin_id = ? AND timestamp BETWEEN ? AND ? ORDER BY timestamp DESC";
 
@@ -203,6 +239,10 @@ public class DatabaseManager {
      * Retrieves waste items for a school within a date range.
      */
     public List<WasteItem> getWasteItemsBySchoolIdAndDateRange(Long schoolId, LocalDateTime start, LocalDateTime end) throws SQLException {
+        if (useMockData) {
+            return mockDb.getWasteItemsBySchoolIdAndDateRange(schoolId, start, end);
+        }
+
         List<WasteItem> items = new ArrayList<>();
         String query = "SELECT wi.* FROM waste_items wi " +
                        "JOIN bins b ON wi.bin_id = b.id " +
@@ -226,6 +266,10 @@ public class DatabaseManager {
      * Inserts a new waste item into the database.
      */
     public Long insertWasteItem(WasteItem item) throws SQLException {
+        if (useMockData) {
+            return mockDb.insertWasteItem(item);
+        }
+
         String query = "INSERT INTO waste_items (bin_id, waste_type, category, image_url, timestamp) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -285,6 +329,11 @@ public class DatabaseManager {
      * Closes the database connection.
      */
     public void close() {
+        if (useMockData) {
+            mockDb.close();
+            return;
+        }
+
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
