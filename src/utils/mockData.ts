@@ -41,17 +41,16 @@ export const generateBins = (): Bin[] => {
 export const generateScanActivity = (binId: string): ScanActivity[] => {
   const materials = ['Paper', 'Plastic', 'General Waste', 'Metal Can', 'Glass Bottle'];
   const activities: ScanActivity[] = [];
-  
+
   for (let i = 0; i < 20; i++) {
     activities.push({
       id: `SCAN-${binId}-${i}`,
       timestamp: new Date(Date.now() - i * 3600000 - Math.random() * 3600000),
       material: materials[Math.floor(Math.random() * materials.length)],
-      weight: Math.random() * 500 + 50,
       accepted: Math.random() > 0.1
     });
   }
-  
+
   return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 };
 

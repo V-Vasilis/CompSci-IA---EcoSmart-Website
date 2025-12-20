@@ -1,7 +1,7 @@
 export interface BinCompartment {
   material: 'Paper' | 'Plastic' | 'General Waste';
-  currentLevel: number; // 0-100
-  capacity: number; // liters
+  currentLevel: number; // 0-100 (percentage full based on item count)
+  capacity: number; // max items
   color: string;
 }
 
@@ -17,7 +17,6 @@ export interface ScanActivity {
   id: string;
   timestamp: Date;
   material: string;
-  weight: number;
   accepted: boolean;
 }
 
