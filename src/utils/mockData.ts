@@ -14,25 +14,35 @@ const locations = [
 ];
 
 export const generateBins = (): Bin[] => {
-  return locations.map((location, index) => {
-    const paperLevel = Math.random() * 100;
-    const plasticLevel = Math.random() * 100;
-    const generalLevel = Math.random() * 100;
-    
-    const maxLevel = Math.max(paperLevel, plasticLevel, generalLevel);
+  // Predefined realistic data for consistent demo
+  const binData = [
+    { location: 'Main Cafeteria', paper: 75, plastic: 82, general: 68 },
+    { location: 'Library - Floor 1', paper: 45, plastic: 38, general: 52 },
+    { location: 'Science Building', paper: 88, plastic: 72, general: 65 },
+    { location: 'Gymnasium', paper: 55, plastic: 90, general: 78 },
+    { location: 'Admin Building', paper: 32, plastic: 28, general: 41 },
+    { location: 'Library - Floor 2', paper: 61, plastic: 55, general: 48 },
+    { location: 'Student Center', paper: 79, plastic: 85, general: 92 },
+    { location: 'Arts Building', paper: 42, plastic: 35, general: 58 },
+    { location: 'Sports Field', paper: 67, plastic: 74, general: 81 },
+    { location: 'Computer Lab', paper: 53, plastic: 47, general: 39 }
+  ];
+
+  return binData.map((data, index) => {
+    const maxLevel = Math.max(data.paper, data.plastic, data.general);
     let status: 'normal' | 'warning' | 'critical' = 'normal';
     if (maxLevel > 80) status = 'critical';
     else if (maxLevel > 60) status = 'warning';
 
     return {
       id: `BIN-${String(index + 1).padStart(3, '0')}`,
-      location,
+      location: data.location,
       compartments: [
-        { material: 'Paper', currentLevel: paperLevel, capacity: 50, color: '#2196F3' },
-        { material: 'Plastic', currentLevel: plasticLevel, capacity: 50, color: '#4CAF50' },
-        { material: 'General Waste', currentLevel: generalLevel, capacity: 50, color: '#F44336' }
+        { material: 'Paper', currentLevel: data.paper, capacity: 50, color: '#2196F3' },
+        { material: 'Plastic', currentLevel: data.plastic, capacity: 50, color: '#4CAF50' },
+        { material: 'General Waste', currentLevel: data.general, capacity: 50, color: '#F44336' }
       ],
-      lastEmptied: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+      lastEmptied: new Date(Date.now() - (index + 1) * 12 * 60 * 60 * 1000), // Staggered times
       status
     };
   });
