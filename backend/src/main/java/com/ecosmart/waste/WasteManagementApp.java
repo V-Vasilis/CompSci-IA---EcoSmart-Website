@@ -128,6 +128,16 @@ public class WasteManagementApp {
     private static void testDatabaseConnection() {
         try {
             DatabaseManager dbManager = DatabaseManager.getInstance();
+
+            if (dbManager.isUsingMockData()) {
+                System.out.println("[✓] Mock Database: OK (Development Mode)");
+                var schools = dbManager.getAllSchools();
+                System.out.println("[✓] Mock data loaded: " + schools.size() + " schools available");
+                System.out.println("\n    NOTE: Running with in-memory mock data.");
+                System.out.println("    To use MySQL, configure DB_URL, DB_USER, DB_PASSWORD in .env");
+                return;
+            }
+
             if (dbManager.getConnection() != null && !dbManager.getConnection().isClosed()) {
                 System.out.println("[✓] Database connection: OK");
 
