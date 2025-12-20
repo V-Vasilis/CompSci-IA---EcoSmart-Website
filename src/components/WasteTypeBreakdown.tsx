@@ -22,18 +22,29 @@ export function WasteTypeBreakdown({ bins }: WasteTypeBreakdownProps) {
       totals['General Waste'] += bin.compartments[2].currentLevel;
     });
 
+    // Calculate total and normalize to 100%
+    const total = totals.Paper + totals.Plastic + totals['General Waste'];
+    if (total === 0) {
+      return [
+        { name: 'Paper', value: 33.33, color: '#2196F3' },
+        { name: 'Plastic', value: 33.33, color: '#4CAF50' },
+        { name: 'General Waste', value: 33.34, color: '#F44336' }
+      ];
+    }
+
     return [
-      { name: 'Paper', value: totals.Paper / bins.length, color: '#2196F3' },
-      { name: 'Plastic', value: totals.Plastic / bins.length, color: '#4CAF50' },
-      { name: 'General Waste', value: totals['General Waste'] / bins.length, color: '#F44336' }
+      { name: 'Paper', value: (totals.Paper / total) * 100, color: '#2196F3' },
+      { name: 'Plastic', value: (totals.Plastic / total) * 100, color: '#4CAF50' },
+      { name: 'General Waste', value: (totals['General Waste'] / total) * 100, color: '#F44336' }
     ];
   }, [bins]);
 
-  const totalVolume = useMemo(() => {
+  const totalItems = useMemo(() => {
+    // Estimate total items based on number of bins and average fill level
     return bins.reduce((acc, bin) => {
-      return acc + bin.compartments.reduce((sum, comp) => {
-        return sum + (comp.currentLevel / 100 * comp.capacity);
-      }, 0);
+      const avgLevel = bin.compartments.reduce((sum, comp) => sum + comp.currentLevel, 0) / 3;
+      // Estimate ~50 items per bin at 100% capacity
+      return acc + Math.round((avgLevel / 100) * 50);
     }, 0);
   }, [bins]);
 
@@ -75,9 +86,9 @@ export function WasteTypeBreakdown({ bins }: WasteTypeBreakdownProps) {
 
         <div className="flex flex-col justify-center space-y-4">
           <div>
-            <div className="text-sm text-gray-600 mb-2">Total Volume Collected</div>
+            <div className="text-sm text-gray-600 mb-2">Total Items Collected</div>
             <div className="text-3xl" style={{ color: '#2196F3' }}>
-              {totalVolume.toFixed(1)}L
+              {totalItems}
             </div>
           </div>
 

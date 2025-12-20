@@ -17,11 +17,21 @@ export function BinDetail({ bin, onBack }: BinDetailProps) {
   const scanActivity = useMemo(() => generateScanActivity(bin.id), [bin.id]);
   const predictions = useMemo(() => generatePredictions(bin.compartments), [bin.compartments]);
 
-  const pieData = bin.compartments.map(comp => ({
-    name: comp.material,
-    value: comp.currentLevel,
-    color: comp.color
-  }));
+  const pieData = useMemo(() => {
+    const total = bin.compartments.reduce((sum, comp) => sum + comp.currentLevel, 0);
+    if (total === 0) {
+      return bin.compartments.map(comp => ({
+        name: comp.material,
+        value: 33.33,
+        color: comp.color
+      }));
+    }
+    return bin.compartments.map(comp => ({
+      name: comp.material,
+      value: (comp.currentLevel / total) * 100,
+      color: comp.color
+    }));
+  }, [bin.compartments]);
 
   const getRecommendedEmptyingDate = () => {
     const criticalPrediction = predictions.find(p => 
@@ -97,7 +107,7 @@ export function BinDetail({ bin, onBack }: BinDetailProps) {
                       {compartment.currentLevel.toFixed(0)}%
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {((compartment.currentLevel / 100) * compartment.capacity).toFixed(1)}L
+                      Full
                     </div>
                   </div>
                 </div>
@@ -193,7 +203,6 @@ export function BinDetail({ bin, onBack }: BinDetailProps) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm">{scan.weight.toFixed(0)}g</div>
                   <div className="text-xs text-gray-500">
                     {scan.accepted ? 'Accepted' : 'Rejected'}
                   </div>
