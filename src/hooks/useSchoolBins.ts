@@ -59,11 +59,18 @@ export function useSchoolBins(schoolId: string | null): UseSchoolBinsResult {
       return;
     }
 
+    const numericId = parseInt(schoolId);
+    if (isNaN(numericId)) {
+      setError('Invalid school ID: must be a number');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      const apiBins = await api.getSchoolBins(parseInt(schoolId));
+      const apiBins = await api.getSchoolBins(numericId);
       const convertedBins = apiBins.map(convertApiBinToBin);
 
       setBins(convertedBins);

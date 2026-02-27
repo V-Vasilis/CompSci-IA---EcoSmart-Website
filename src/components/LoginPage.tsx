@@ -22,18 +22,21 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
     // Simulate authentication delay
     setTimeout(() => {
-      // Mock authentication - accept any school ID with password "demo"
-      if (schoolId.trim() && password === 'demo') {
-        onLogin(schoolId);
-      } else if (!schoolId.trim()) {
+      // Mock authentication - accept any numeric school ID with password "demo"
+      if (!schoolId.trim()) {
         setError('Please enter a School ID');
+        setIsLoading(false);
+      } else if (isNaN(Number(schoolId.trim())) || !Number.isInteger(Number(schoolId.trim()))) {
+        setError('School ID must be a number');
         setIsLoading(false);
       } else if (!password) {
         setError('Please enter a password');
         setIsLoading(false);
-      } else {
+      } else if (password !== 'demo') {
         setError('Invalid credentials. Use password "demo" to login.');
         setIsLoading(false);
+      } else {
+        onLogin(schoolId.trim());
       }
     }, 800);
   };
@@ -104,7 +107,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
           <div className="text-center">
             <p className="text-xs text-gray-500">
-              Demo credentials: Any School ID with password "demo"
+              Demo credentials: School ID "1" with password "demo"
             </p>
           </div>
         </form>
