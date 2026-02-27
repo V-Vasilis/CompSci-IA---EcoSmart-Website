@@ -5,7 +5,7 @@ import {
   SubscriptionMessage,
 } from '../types/api';
 
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080';
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || `ws://${window.location.hostname}:8080`;
 
 type MessageHandler = (message: WebSocketMessage) => void;
 type BinUpdateHandler = (update: BinUpdateMessage) => void;

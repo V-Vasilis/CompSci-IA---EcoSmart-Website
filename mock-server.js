@@ -296,7 +296,7 @@ function handleRequest(req, res) {
 // Create and start server
 const server = http.createServer(handleRequest);
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log('\n');
   console.log('  ███████╗ ██████╗ ██████╗ ███████╗███╗   ███╗ █████╗ ██████╗ ████████╗');
   console.log('  ██╔════╝██╔════╝██╔═══██╗██╔════╝████╗ ████║██╔══██╗██╔══██╗╚══██╔══╝');
