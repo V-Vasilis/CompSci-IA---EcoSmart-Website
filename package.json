@@ -52,7 +52,9 @@
             "vite": "^6.4.1"
       },
       "scripts": {
-            "dev": "vite",
+            "dev": "node mock-server.js & vite",
+            "dev:frontend": "vite",
+            "dev:backend": "node mock-server.js",
             "build": "vite build"
       }
 }
